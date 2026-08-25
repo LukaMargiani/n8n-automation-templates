@@ -1,0 +1,1440 @@
+{
+  "name": "GDPR Contact Enricher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            },
+            {
+              "triggerAtHour": 14
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        64
+      ],
+      "id": "d426307c-6fea-4114-ad7a-9e58c2100be3",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_RESEARCH_REQUESTS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Research Requests",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_RESEARCH_REQUESTS_TABLE_ID"
+        },
+        "filterByFormula": "{Status} = 'Pending'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "cbbcc744-8944-4df7-a284-8836a5d5c851",
+      "name": "Read Pending Requests",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -16,
+        64
+      ],
+      "id": "3da9b05e-9f41-4353-a7df-1aa68ffd2e06",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "=gpt-5-mini",
+          "mode": "id"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a contact extraction assistant.\n\nYou receive Tavily search results for a research prompt.\n\nExtract all people mentioned and provide:\n\n- name\n- organization\n- role (Policy Maker, Academic, Journalist, Member Organisation)\n- interests (Migration, Climate, Security, Economy, Enlargement)\n\nReturn only JSON:\n\n{\n  \"contacts\": [\n    {\n      \"name\": \"\",\n      \"organization\": \"\",\n      \"role\": \"\",\n      \"interests\": []\n    }\n  ]\n}\n"
+            },
+            {
+              "content": "={{ JSON.stringify($json, null, 2) }}\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        864,
+        64
+      ],
+      "id": "96f2f15c-6eba-424e-928a-eb75cb7c9e6f",
+      "name": "Extract People",
+      "retryOnFail": true,
+      "waitBetweenTries": 2500,
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.TAVILY_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.Prompt }}"
+            },
+            {
+              "name": "include_answer",
+              "value": "advanced"
+            },
+            {
+              "name": "search_depth",
+              "value": "advanced"
+            },
+            {
+              "name": "max_results",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        80
+      ],
+      "id": "cebfdeb4-98b3-4d91-bf7f-a48c8917566a",
+      "name": "Tavily Deep Search",
+      "retryOnFail": true,
+      "waitBetweenTries": 2500
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output[1].content[0].text.contacts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        64
+      ],
+      "id": "6ce50e9a-66f3-4298-b48b-645491d30c06",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_CONTACT_LIST_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Contact List",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_CONTACT_LIST_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.full_name }}",
+            "Organization/Institution/Department/Region/Sector": "={{ $json.company }}",
+            "Email/Link": "={{ $json.email[0].email }}",
+            "Country": "={{ $json.country }}",
+            "Phone Number": "={{ $json.phone }}",
+            "Research Requests": "=[\"{{ $json.researchRequestId }}\"]",
+            "Interests/Tags": "={{ $json.interests.join(', ') }}",
+            "Notes/Address/Comments": "={{ $json.company_linkedin }}",
+            "Role/Category": "New Contact n8n"
+          },
+          "matchingColumns": [
+            "Name",
+            "Organization/Institution/Department/Region/Sector"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email/Link",
+              "displayName": "Email/Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Organization/Institution/Department/Region/Sector",
+              "displayName": "Organization/Institution/Department/Region/Sector",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Position",
+              "displayName": "Position",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Role/Category",
+              "displayName": "Role/Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New Contact n8n",
+                  "value": "New Contact n8n"
+                },
+                {
+                  "name": "Academic",
+                  "value": "Academic"
+                },
+                {
+                  "name": "Policy Maker",
+                  "value": "Policy Maker"
+                },
+                {
+                  "name": "Journalist",
+                  "value": "Journalist"
+                },
+                {
+                  "name": "Partner Organisation",
+                  "value": "Partner Organisation"
+                },
+                {
+                  "name": "NGO",
+                  "value": "NGO"
+                },
+                {
+                  "name": "Think Tank",
+                  "value": "Think Tank"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Austria",
+                  "value": "Austria"
+                },
+                {
+                  "name": "Belgium",
+                  "value": "Belgium"
+                },
+                {
+                  "name": "Bulgaria",
+                  "value": "Bulgaria"
+                },
+                {
+                  "name": "Croatia",
+                  "value": "Croatia"
+                },
+                {
+                  "name": "Cyprus",
+                  "value": "Cyprus"
+                },
+                {
+                  "name": "Czechia",
+                  "value": "Czechia"
+                },
+                {
+                  "name": "Denmark",
+                  "value": "Denmark"
+                },
+                {
+                  "name": "Estonia",
+                  "value": "Estonia"
+                },
+                {
+                  "name": "Finland",
+                  "value": "Finland"
+                },
+                {
+                  "name": "France",
+                  "value": "France"
+                },
+                {
+                  "name": "Germany",
+                  "value": "Germany"
+                },
+                {
+                  "name": "Greece",
+                  "value": "Greece"
+                },
+                {
+                  "name": "Hungary",
+                  "value": "Hungary"
+                },
+                {
+                  "name": "Ireland",
+                  "value": "Ireland"
+                },
+                {
+                  "name": "Italy",
+                  "value": "Italy"
+                },
+                {
+                  "name": "Latvia",
+                  "value": "Latvia"
+                },
+                {
+                  "name": "Lithuania",
+                  "value": "Lithuania"
+                },
+                {
+                  "name": "Luxembourg",
+                  "value": "Luxembourg"
+                },
+                {
+                  "name": "Malta",
+                  "value": "Malta"
+                },
+                {
+                  "name": "Netherlands",
+                  "value": "Netherlands"
+                },
+                {
+                  "name": "Poland",
+                  "value": "Poland"
+                },
+                {
+                  "name": "Portugal",
+                  "value": "Portugal"
+                },
+                {
+                  "name": "Romania",
+                  "value": "Romania"
+                },
+                {
+                  "name": "Slovakia",
+                  "value": "Slovakia"
+                },
+                {
+                  "name": "Slovenia",
+                  "value": "Slovenia"
+                },
+                {
+                  "name": "Spain",
+                  "value": "Spain"
+                },
+                {
+                  "name": "Sweden",
+                  "value": "Sweden"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Interests/Tags",
+              "displayName": "Interests/Tags",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes/Address/Comments",
+              "displayName": "Notes/Address/Comments",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Research Requests",
+              "displayName": "Research Requests",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Time Created",
+              "displayName": "Time Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": false,
+          "updateAllMatches": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2512,
+        272
+      ],
+      "id": "85b52532-1d51-4de3-9693-329277dd17fa",
+      "name": "Upsert Contact",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_RESEARCH_REQUESTS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Research Requests",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_RESEARCH_REQUESTS_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Completed",
+            "Prompt": "={{ $('Loop Over Items').item.json.Prompt }}"
+          },
+          "matchingColumns": [
+            "Prompt"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Target Country",
+              "displayName": "Target Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Austria",
+                  "value": "Austria"
+                },
+                {
+                  "name": "Belgium",
+                  "value": "Belgium"
+                },
+                {
+                  "name": "Bulgaria",
+                  "value": "Bulgaria"
+                },
+                {
+                  "name": "Croatia",
+                  "value": "Croatia"
+                },
+                {
+                  "name": "Cyprus",
+                  "value": "Cyprus"
+                },
+                {
+                  "name": "Czechia",
+                  "value": "Czechia"
+                },
+                {
+                  "name": "Denmark",
+                  "value": "Denmark"
+                },
+                {
+                  "name": "Estonia",
+                  "value": "Estonia"
+                },
+                {
+                  "name": "Finland",
+                  "value": "Finland"
+                },
+                {
+                  "name": "France",
+                  "value": "France"
+                },
+                {
+                  "name": "Germany",
+                  "value": "Germany"
+                },
+                {
+                  "name": "Greece",
+                  "value": "Greece"
+                },
+                {
+                  "name": "Hungary",
+                  "value": "Hungary"
+                },
+                {
+                  "name": "Ireland",
+                  "value": "Ireland"
+                },
+                {
+                  "name": "Italy",
+                  "value": "Italy"
+                },
+                {
+                  "name": "Latvia",
+                  "value": "Latvia"
+                },
+                {
+                  "name": "Lithuania",
+                  "value": "Lithuania"
+                },
+                {
+                  "name": "Luxembourg",
+                  "value": "Luxembourg"
+                },
+                {
+                  "name": "Malta",
+                  "value": "Malta"
+                },
+                {
+                  "name": "Netherlands",
+                  "value": "Netherlands"
+                },
+                {
+                  "name": "Poland",
+                  "value": "Poland"
+                },
+                {
+                  "name": "Portugal",
+                  "value": "Portugal"
+                },
+                {
+                  "name": "Romania",
+                  "value": "Romania"
+                },
+                {
+                  "name": "Slovakia",
+                  "value": "Slovakia"
+                },
+                {
+                  "name": "Slovenia",
+                  "value": "Slovenia"
+                },
+                {
+                  "name": "Spain",
+                  "value": "Spain"
+                },
+                {
+                  "name": "Sweden",
+                  "value": "Sweden"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Completed",
+                  "value": "Completed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Time Created",
+              "displayName": "Time Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Contacts",
+              "displayName": "Contacts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2656,
+        64
+      ],
+      "id": "43edae7b-106e-44c1-8b38-eaf2d3e60eb0",
+      "name": "Mark Request Complete",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dropcontact.com/v1/enrich/all",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "dropcontactApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1600,
+        -80
+      ],
+      "id": "1a1080dd-6bfd-4061-abb0-adc93d0b568c",
+      "name": "Dropcontact: Submit Batch",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "dropcontactApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Dropcontact account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fetchRequest",
+        "requestId": "={{ $json.request_id }}"
+      },
+      "type": "n8n-nodes-base.dropcontact",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        -80
+      ],
+      "id": "616189d1-cd7e-4999-824f-26bc5b19d9af",
+      "name": "Dropcontact: Fetch Result",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "dropcontactApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Dropcontact account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2336,
+        64
+      ],
+      "id": "4fdbd86e-d416-44ea-98ac-eddec9daf4be",
+      "name": "Loop Over Contacts"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst returnData = [];\n\nfor (const item of items) {\n  let results = item.json.results || [];\n  \n  // Filter for high quality\n  const goodResults = results.filter(result => result.score >= 0.7);\n\n  if (goodResults.length > 0) {\n    // SUCCESS: We found good data\n    item.json.results = goodResults;\n    item.json.found_data = true; // Flag for next IF node\n    returnData.push(item);\n  } else {\n    // FAILURE: No good data found\n    item.json.results = []; \n    item.json.found_data = false; // Flag for next IF node\n    returnData.push(item);\n  }\n}\n\nreturn returnData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        64
+      ],
+      "id": "af2d957f-918f-4d82-9b7f-a3443f6b3562",
+      "name": "Filter By Confidence"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "54c57276-2346-4c27-9474-3c4d71bbca49",
+              "name": "researchRequestId",
+              "value": "={{ $('Loop Over Items').first().json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1232,
+        64
+      ],
+      "id": "8ecc21ab-abdd-4c01-bf97-8181bcc29746",
+      "name": "Attach Request Id"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2112,
+        64
+      ],
+      "id": "2f18d0c1-38a2-4f2d-9f7e-37ac97fefb36",
+      "name": "Recombine With Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dropcontact.com/v1/webhooks/subscriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Access-Token",
+              "value": "={{ $env.DROPCONTACT_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"event_type\": \"enrich_api_result\",\n    \"active\": true,\n    \"callback_url\": \"https://google.com\", \n    \"period_s\": 5,\n    \"max_webhooks_per_period\": 30\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1328,
+        688
+      ],
+      "id": "da2b0ae7-6c24-4de7-9d24-60c9cdf8aec1",
+      "name": "One-Time Webhook Setup",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        688
+      ],
+      "id": "e0d68a37-527f-4bca-93b9-5b435acaf39f",
+      "name": "Manual: Webhook Setup",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 90
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        -80
+      ],
+      "id": "cd1c8bba-f548-4398-a140-ea4e4fc4a0c6",
+      "name": "Wait For Callback"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input items\nconst items = $input.all();\n\n// VITAL: This accesses the URL of the *upcoming* Wait node.\n// n8n automatically resolves this value at runtime.\nconst webhookUrl = $execution.resumeUrl; \n\n// Format for Dropcontact\nconst formattedData = items.map(item => ({\n    full_name: item.json.name,\n    company: item.json.organization\n}));\n\n// Return the payload with the dynamic URL\nreturn [{\n    json: {\n        data: formattedData,\n        siren: true,\n        language: \"en\",\n        // Pass the dynamic URL to Dropcontact\n        custom_callback_url: webhookUrl \n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        -80
+      ],
+      "id": "c9f962cc-6a84-4068-9074-8a6f50c3505d",
+      "name": "Format For Dropcontact"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5e0c5efb-4525-48b1-ac43-1f187ec1c755",
+              "leftValue": "={{ $json.found_data }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        80
+      ],
+      "id": "e0102072-f00f-4325-820a-d26c704118bd",
+      "name": "Found Usable Results?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_RESEARCH_REQUESTS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Research Requests",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_RESEARCH_REQUESTS_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Prompt": "{{ $('Loop Over Items').item.json.Prompt }}",
+            "Status": "Failed - Low Confidence"
+          },
+          "matchingColumns": [
+            "Prompt"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Target Country",
+              "displayName": "Target Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Austria",
+                  "value": "Austria"
+                },
+                {
+                  "name": "Belgium",
+                  "value": "Belgium"
+                },
+                {
+                  "name": "Bulgaria",
+                  "value": "Bulgaria"
+                },
+                {
+                  "name": "Croatia",
+                  "value": "Croatia"
+                },
+                {
+                  "name": "Cyprus",
+                  "value": "Cyprus"
+                },
+                {
+                  "name": "Czechia",
+                  "value": "Czechia"
+                },
+                {
+                  "name": "Denmark",
+                  "value": "Denmark"
+                },
+                {
+                  "name": "Estonia",
+                  "value": "Estonia"
+                },
+                {
+                  "name": "Finland",
+                  "value": "Finland"
+                },
+                {
+                  "name": "France",
+                  "value": "France"
+                },
+                {
+                  "name": "Germany",
+                  "value": "Germany"
+                },
+                {
+                  "name": "Greece",
+                  "value": "Greece"
+                },
+                {
+                  "name": "Hungary",
+                  "value": "Hungary"
+                },
+                {
+                  "name": "Ireland",
+                  "value": "Ireland"
+                },
+                {
+                  "name": "Italy",
+                  "value": "Italy"
+                },
+                {
+                  "name": "Latvia",
+                  "value": "Latvia"
+                },
+                {
+                  "name": "Lithuania",
+                  "value": "Lithuania"
+                },
+                {
+                  "name": "Luxembourg",
+                  "value": "Luxembourg"
+                },
+                {
+                  "name": "Malta",
+                  "value": "Malta"
+                },
+                {
+                  "name": "Netherlands",
+                  "value": "Netherlands"
+                },
+                {
+                  "name": "Poland",
+                  "value": "Poland"
+                },
+                {
+                  "name": "Portugal",
+                  "value": "Portugal"
+                },
+                {
+                  "name": "Romania",
+                  "value": "Romania"
+                },
+                {
+                  "name": "Slovakia",
+                  "value": "Slovakia"
+                },
+                {
+                  "name": "Slovenia",
+                  "value": "Slovenia"
+                },
+                {
+                  "name": "Spain",
+                  "value": "Spain"
+                },
+                {
+                  "name": "Sweden",
+                  "value": "Sweden"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Completed",
+                  "value": "Completed"
+                },
+                {
+                  "name": "Failed - Low Confidence",
+                  "value": "Failed - Low Confidence"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Time Created",
+              "displayName": "Time Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Contacts",
+              "displayName": "Contacts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        272
+      ],
+      "id": "2677573f-4703-419a-88b8-b84b4946fe30",
+      "name": "Mark Request Low-Confidence",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Pending Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Pending Requests": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Tavily Deep Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract People": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Deep Search": {
+      "main": [
+        [
+          {
+            "node": "Filter By Confidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Attach Request Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Request Complete": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dropcontact: Submit Batch": {
+      "main": [
+        [
+          {
+            "node": "Wait For Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dropcontact: Fetch Result": {
+      "main": [
+        [
+          {
+            "node": "Recombine With Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Contacts": {
+      "main": [
+        [
+          {
+            "node": "Mark Request Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter By Confidence": {
+      "main": [
+        [
+          {
+            "node": "Found Usable Results?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Request Id": {
+      "main": [
+        [
+          {
+            "node": "Format For Dropcontact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Recombine With Request",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Recombine With Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual: Webhook Setup": {
+      "main": [
+        [
+          {
+            "node": "One-Time Webhook Setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait For Callback": {
+      "main": [
+        [
+          {
+            "node": "Dropcontact: Fetch Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format For Dropcontact": {
+      "main": [
+        [
+          {
+            "node": "Dropcontact: Submit Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Found Usable Results?": {
+      "main": [
+        [
+          {
+            "node": "Extract People",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Request Low-Confidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "YOUR_ERROR_WORKFLOW_ID"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

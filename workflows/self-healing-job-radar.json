@@ -1,0 +1,959 @@
+{
+  "name": "Self-Healing Job Radar",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        -160
+      ],
+      "id": "4efdc3d1-1166-4685-b139-d14963203b57",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_ORGANISATIONS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Organisations",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_ORGANISATIONS_TABLE_ID"
+        },
+        "options": {
+          "fields": [
+            "Organisation Name",
+            "Career Page",
+            "Website URL"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        -80
+      ],
+      "id": "2f1fb4a9-7242-4497-bd63-34655f59245c",
+      "name": "Read Organisations",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.FIRECRAWL_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $('Keep Existing URL').new_career_url }} || \",\n  \"formats\": [\n    \"markdown\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2032,
+        16
+      ],
+      "id": "c0ae39bd-5a2f-4f17-98d6-db3b32737171",
+      "name": "Firecrawl: Scrape Career Page"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "\"You are a Job Extraction Engine. I will give you the text of a webpage. Task: Extract all current, open job listings. Rules:\n\n        Ignore \"General Applications\" (unless specific).\n\n         Return a JSON object with a key 'jobs' containing a list.\n\n         Output Strictly only English.\n\n    Output Format: { \"jobs\": [ { \"title\": \"...\", \"snippet/summary\": \"...\", \"link\": \"...\", \"deadline\": \"...\" } ] }\".\n        "
+            },
+            {
+              "content": "={{ $json.data.markdown }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        16
+      ],
+      "id": "79247d70-1870-40e8-81c4-28eeab78026d",
+      "name": "Extract Open Roles",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_VACANCIES_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Vacancies",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_VACANCIES_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "New",
+            "Date Found": "={{ $now }}",
+            "Job Title": "={{ $json.Jobs.title }}",
+            "Organisation": "={{ [ $('Loop Over Organisations').item.json.id ] }}",
+            "Link": "={{ $json.Jobs.link }}",
+            "Summary/Snippet": "={{ $json.Jobs[\"snippet/summary\"] }}",
+            "Deadline": "={{ $json.Jobs.deadline }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Summary/Snippet",
+              "displayName": "Summary/Snippet",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Organisation",
+              "displayName": "Organisation",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                },
+                {
+                  "name": "Posted",
+                  "value": "Posted"
+                },
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Found",
+              "displayName": "Date Found",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3040,
+        80
+      ],
+      "id": "9f49a31a-95b0-4ec9-b71e-757b426211d6",
+      "name": "Store Vacancy",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2832,
+        48
+      ],
+      "id": "e15b6d58-814c-437d-9b28-2510ee57e7d4",
+      "name": "Loop Over New Roles"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "e420cbce-3184-407a-89ad-4423f2b2c3ec",
+      "name": "Loop Over Organisations"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output[1].content[0].text.jobs",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "title, snippet/summary, link, deadline",
+        "options": {
+          "destinationFieldName": "Jobs"
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        16
+      ],
+      "id": "e0e3df3c-2398-4de3-a84e-2e29f869f07b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Jobs.title",
+              "field2": "Job Title"
+            },
+            {
+              "field1": "Jobs[\"snippet/summary\"]",
+              "field2": "Summary/Snippet"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2608,
+        -80
+      ],
+      "id": "5739a43c-51ed-4c90-9a9e-ee9c3b01dd60",
+      "name": "Drop Already-Seen Roles"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_VACANCIES_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Vacancies",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_VACANCIES_TABLE_ID"
+        },
+        "options": {
+          "fields": [
+            "Job Title",
+            "Summary/Snippet"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        -224
+      ],
+      "id": "c43fc45b-a3d8-46aa-8d14-2bff9d693f56",
+      "name": "Read Known Vacancies",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "HEAD",
+        "url": "={{ $json[\"Career Page\"] }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        960,
+        -48
+      ],
+      "id": "bb1bbd5c-9349-4b7c-81d3-c0229e125985",
+      "name": "Check URL Is Alive",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "53b0c1b5-f077-4513-b55a-0dccf3bfd653",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "1b130826-60e9-4e25-acc2-f96a480bda38",
+              "leftValue": "={{ $('Loop Over Organisations').item.json['Career Page'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -48
+      ],
+      "id": "2b1170c5-18e0-41c9-a18c-80fd2b3864f5",
+      "name": "URL Still Works?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.FIRECRAWL_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $('Loop Over Organisations').item.json[\"Website URL\"] }}\",\n  \"formats\": [\"links\"],\n  \"onlyMainContent\": false\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1344,
+        32
+      ],
+      "id": "bbf453fe-25a1-4bf1-bfd0-64964bcc3743",
+      "name": "Firecrawl: Discover Career Page",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Automation Base",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_ORGANISATIONS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Organisations",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_ORGANISATIONS_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Career Page": "={{ $json.new_career_url }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Organisation Name",
+              "displayName": "Organisation Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Career Page",
+              "displayName": "Career Page",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Featured Date",
+              "displayName": "Last Featured Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Content Drafts",
+              "displayName": "Content Drafts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Vacancies",
+              "displayName": "Vacancies",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1696,
+        32
+      ],
+      "id": "fdab1fc3-b42e-4a4a-a937-90c5716e3b3c",
+      "name": "Write Career URL Back",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get input\nconst firecrawlInput = $input.first().json;\n// Handle cases where 'links' is undefined or empty\nconst foundLinks = firecrawlInput.links || firecrawlInput.data?.links || [];\n\n// 2. Get original data\nconst originalData = $('Loop Over Organisations').item.json;\nconst originalLink = originalData['Website URL'] || originalData['Career Page'];\n\nlet bestLink = originalLink; // Default to what we have\n\n// 3. If we actually found new links, try to find a better one\nif (foundLinks.length > 0) {\n    // Filter for relevant keywords\n    const keywords = [\n        'career', 'job', 'vacanc', 'recruit', 'position',           'opening', 'opportunit', 'hiring', 'join', \n        'fellowship', 'internship', 'call', 'application',\n        'carriere', 'emplois', 'karriere', 'stellen',               'trabajo', 'vacature', 'tyopaikat', 'lediga'\n    ];\n    const candidates = foundLinks.filter(link => \n        keywords.some(k => link.toLowerCase().includes(k))\n    );\n\n    if (candidates.length > 0) {\n        // Pick the shortest one (likely the main index page)\n        candidates.sort((a, b) => a.length - b.length);\n        bestLink = candidates[0];\n    }\n}\n\n// 4. Output\nreturn {\n    json: {\n        new_career_url: bestLink,\n        id: originalData.id\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        32
+      ],
+      "id": "74a64122-b078-4596-a5cf-cf8a0f9fee65",
+      "name": "Pick Best Career Link"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1856,
+        -288
+      ],
+      "id": "4cf1c53d-66ab-4921-ba88-0f444300f144",
+      "name": "Merge1",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "waitBetweenTries": 2000,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "To make this more robust: \n\naddition of keywords in the languages of all 37 countries.\n\n\n\nNOT({Career Page} = BLANK())",
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1248,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "aec94188-bdba-4f59-b896-9243a2d5a928",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6fc5cdda-d40b-48ab-8635-c7e51eb3b891",
+              "leftValue": "={{ $json[\"Career Page\"] || \"NO_LINK\" }}",
+              "rightValue": "NO_LINK",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        16
+      ],
+      "id": "4c1d3997-4630-49b1-b748-45e12766ddac",
+      "name": "Has career URL?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "17ebac8a-7260-4227-b641-1a739cb859dd",
+              "name": "new_career_url",
+              "value": "={{ $('Loop Over Organisations').item.json[\"Career Page\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        -128
+      ],
+      "id": "e9bae280-5787-4b0f-ab7f-bbd687d0bc97",
+      "name": "Keep Existing URL"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Known Vacancies",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Organisations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Organisations": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Organisations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Scrape Career Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Open Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Open Roles": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over New Roles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Organisations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store Vacancy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Organisations": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Has career URL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Drop Already-Seen Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drop Already-Seen Roles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over New Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Known Vacancies": {
+      "main": [
+        [
+          {
+            "node": "Drop Already-Seen Roles",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Store Vacancy": {
+      "main": [
+        [
+          {
+            "node": "Loop Over New Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check URL Is Alive": {
+      "main": [
+        [
+          {
+            "node": "URL Still Works?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL Still Works?": {
+      "main": [
+        [
+          {
+            "node": "Keep Existing URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Firecrawl: Discover Career Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Discover Career Page": {
+      "main": [
+        [
+          {
+            "node": "Pick Best Career Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Best Career Link": {
+      "main": [
+        [
+          {
+            "node": "Write Career URL Back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Career URL Back": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Scrape Career Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        []
+      ]
+    },
+    "Has career URL?": {
+      "main": [
+        [
+          {
+            "node": "Check URL Is Alive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Firecrawl: Discover Career Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Existing URL": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Scrape Career Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
