@@ -52,3 +52,15 @@ All four scheduled workflows use `splitInBatches` with the IF branches feeding *
 ## Cost is an architectural input
 
 The Spotlight Generator uses Jina AI because it runs monthly and fits a free tier. The Job Radar uses Firecrawl because it needs crawl-and-discover. The EU Funding Radar filters on deadline and freshness *before* scoring, so tokens are only spent on calls that can still be acted on. Choosing the cheaper tool where it suffices is a design decision, not a compromise.
+
+## Job Scout follows the same rules
+
+Job Scout came later and was not part of the engagement. It uses n8n Data Tables instead of Airtable and Claude instead of OpenAI, but the same decisions hold:
+
+| Pattern | In Job Scout |
+|---|---|
+| The model judges, deterministic logic decides | The model returns `qualified_pct` and a `dealbreaker` reason; `Keep Qualified Jobs` applies `minQualifiedPct` and the experience and seniority backstops |
+| Configuration outside the logic | Every threshold, source switch and search list lives in one `Your Settings` node |
+| Structured output everywhere | Both LLM calls return a JSON array; a malformed answer is re-parsed one object at a time so it costs one job, not a batch |
+| Failure is a state, not an absence | Every source failure, and every source that returned zero, is listed in the `_fetch_report` on the first normalised job |
+| Idempotency by design | A job is skipped if its link was seen before, or if its company and title are already in the table as applied or shortlisted |

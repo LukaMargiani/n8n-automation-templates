@@ -1,0 +1,1576 @@
+{
+  "name": "Job Scout",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "cd23014b-7937-4645-abc7-8fdf129a56cb",
+      "name": "Every Day at 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-0",
+              "name": "cvText",
+              "type": "string",
+              "value": "PASTE YOUR CV HERE as plain text: skills, work experience with dates, education with dates, and spoken languages with levels (e.g. English C1, Spanish A2). The AI compares every job description against this text."
+            },
+            {
+              "id": "set-1",
+              "name": "homeCountry",
+              "type": "string",
+              "value": "Germany"
+            },
+            {
+              "id": "set-2",
+              "name": "minQualifiedPct",
+              "type": "number",
+              "value": 50
+            },
+            {
+              "id": "set-28",
+              "name": "dropIfYearsRequiredAtLeast",
+              "type": "number",
+              "value": 5
+            },
+            {
+              "id": "set-29",
+              "name": "dropSeniorRoles",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "set-3",
+              "name": "locations",
+              "type": "array",
+              "value": "={{ [\"germany\", \"deutschland\", \"remote\"] }}"
+            },
+            {
+              "id": "set-4",
+              "name": "remoteOk",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "set-5",
+              "name": "salaryFloorEUR",
+              "type": "number",
+              "value": 40000
+            },
+            {
+              "id": "set-6",
+              "name": "maxAgeDays",
+              "type": "number",
+              "value": 60
+            },
+            {
+              "id": "set-7",
+              "name": "dealbreakerKeywords",
+              "type": "array",
+              "value": "={{ [\"unpaid\", \"security clearance\", \"10+ years\"] }}"
+            },
+            {
+              "id": "set-8",
+              "name": "greenhouseBoards",
+              "type": "array",
+              "value": "={{ [] }}"
+            },
+            {
+              "id": "set-9",
+              "name": "leverCompanies",
+              "type": "array",
+              "value": "={{ [] }}"
+            },
+            {
+              "id": "set-10",
+              "name": "ashbyBoards",
+              "type": "array",
+              "value": "={{ [] }}"
+            },
+            {
+              "id": "set-11",
+              "name": "useArbeitnow",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "set-12",
+              "name": "useRemoteOk",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "set-13",
+              "name": "useArbeitsagentur",
+              "type": "boolean",
+              "value": false
+            },
+            {
+              "id": "set-14",
+              "name": "arbeitsagenturKeyword",
+              "type": "string",
+              "value": "Softwareentwickler"
+            },
+            {
+              "id": "set-15",
+              "name": "arbeitsagenturLocation",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "set-16",
+              "name": "adzunaCountry",
+              "type": "string",
+              "value": "de"
+            },
+            {
+              "id": "set-17",
+              "name": "adzunaKeywords",
+              "type": "string",
+              "value": "software engineer"
+            },
+            {
+              "id": "set-18",
+              "name": "adzunaResultsPerPage",
+              "type": "number",
+              "value": 50
+            },
+            {
+              "id": "set-19",
+              "name": "jsearchQueries",
+              "type": "array",
+              "value": "={{ [\"software engineer in Germany\", \"product manager in Germany\"] }}"
+            },
+            {
+              "id": "set-20",
+              "name": "jsearchCountry",
+              "type": "string",
+              "value": "de"
+            },
+            {
+              "id": "set-21",
+              "name": "jsearchDatePosted",
+              "type": "string",
+              "value": "month"
+            },
+            {
+              "id": "set-22",
+              "name": "joobleApiKey",
+              "type": "string",
+              "value": "YOUR_JOOBLE_API_KEY"
+            },
+            {
+              "id": "set-23",
+              "name": "joobleLocation",
+              "type": "string",
+              "value": "Germany"
+            },
+            {
+              "id": "set-24",
+              "name": "joobleKeywords",
+              "type": "array",
+              "value": "={{ [\"software engineer\", \"product manager\"] }}"
+            },
+            {
+              "id": "set-25",
+              "name": "firecrawlBoardUrls",
+              "type": "array",
+              "value": "={{ [\"https://www.germantechjobs.de/en/jobs\", \"https://www.wearedevelopers.com/en/jobs\"] }}"
+            },
+            {
+              "id": "set-26",
+              "name": "digestToEmail",
+              "type": "string",
+              "value": "you@example.com"
+            },
+            {
+              "id": "set-27",
+              "name": "digestFromEmail",
+              "type": "string",
+              "value": "job-scout@example.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "454661c5-ea25-4dc7-8ea4-4b962cc508bd",
+      "name": "Your Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2416,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function decode(b64){ try { return Buffer.from(String(b64||\"\").replace(/-/g,\"+\").replace(/_/g,\"/\"),\"base64\").toString(\"utf8\"); } catch(e){ return \"\"; } }\nfunction getHeader(pl,name){ const h=(pl&&pl.headers)||[]; const f=h.find(x=>x.name&&x.name.toLowerCase()===name.toLowerCase()); return f?f.value:\"\"; }\nfunction bodyFromPayload(pl){\n  if(!pl) return \"\";\n  if(pl.body&&pl.body.data) return decode(pl.body.data);\n  if(pl.parts&&pl.parts.length){\n    const plain=pl.parts.find(p=>p.mimeType===\"text/plain\");\n    if(plain&&plain.body&&plain.body.data) return decode(plain.body.data);\n    const html=pl.parts.find(p=>p.mimeType===\"text/html\");\n    if(html&&html.body&&html.body.data) return decode(html.body.data);\n    for(const p of pl.parts){ const r=bodyFromPayload(p); if(r) return r; }\n  }\n  return \"\";\n}\nconst strip = s => String(s||\"\")\n  .replace(/<style[\\s\\S]*?<\\/style>/gi,\" \").replace(/<script[\\s\\S]*?<\\/script>/gi,\" \")\n  .replace(/<[^>]+>/g,\" \").replace(/&nbsp;/gi,\" \").replace(/&amp;/gi,\"&\")\n  .replace(/\\s+/g,\" \").trim();\n\n// Obvious noise that must never be read as \"I applied here\".\nconst NOISE = /(job alert|jobalert|new jobs|jobs for you|jobs matching|recommended for you|job recommendations|newsletter|job digest|saved search|jobbenachrichtigung|stellenangebote fuer dich|apply now|hiring now)/i;\n\nconst emails = [];\nlet skipped = 0;\nfor (const it of $input.all()) {\n  const m = it.json;\n  // Gmail step failed (e.g. expired login): it passes an error item instead of emails.\n  // Skip application tracking for today; the job search still runs.\n  if (m.error) { console.log(\"GMAIL FAILED, skipping application tracking today:\", typeof m.error === \"string\" ? m.error : JSON.stringify(m.error).slice(0, 300)); continue; }\n  const subject = m.subject || m.Subject || getHeader(m.payload, \"Subject\") || \"\";\n  const from    = m.from    || m.From    || getHeader(m.payload, \"From\") || \"\";\n  let body = m.text || \"\";\n  if (!body) body = strip(m.html || \"\");\n  if (!body) body = strip(bodyFromPayload(m.payload));\n  if (!body) body = m.snippet || \"\";\n  const date    = m.date || getHeader(m.payload, \"Date\") || (m.internalDate ? new Date(Number(m.internalDate)).toISOString() : \"\");\n  // Gmail returns one empty item when nothing matched (alwaysOutputData) — skip it.\n  if (!subject && !body) continue;\n  if (NOISE.test(subject) || NOISE.test(String(body).slice(0, 400))) { skipped++; continue; }\n  emails.push({ d: String(date).slice(0, 25), s: subject, f: from, b: String(body).slice(0, 900) });\n}\n\nconst lines = [\n  \"These are emails from ONE person’s inbox.\",\n  \"\",\n  \"Extract ONLY emails that PROVE this person already SUBMITTED an application:\",\n  \"  - an application confirmation / acknowledgement from an employer or its ATS, or\",\n  \"  - a rejection or interview invitation that refers to an application they submitted.\",\n  \"\",\n  \"NEVER extract: job alerts, job recommendations, job-board digests, newsletters,\",\n  \"recruiter cold outreach, marketing, or any email that merely mentions open roles.\",\n  \"A company simply appearing in an email is NOT evidence of an application.\",\n  \"If you are not certain the person actually applied, LEAVE IT OUT — omitting is always safer.\",\n  \"\",\n  \"For every genuine application return the employer name and the EXACT role title as written\",\n  \"in the email. If no role title is stated anywhere, return an empty title.\",\n  \"confidence = how sure you are that this person applied (0.0 - 1.0).\",\n  \"date = the email's date (field d) as YYYY-MM-DD.\",\n  \"\",\n  \"Return ONLY a JSON array, no prose:\",\n  \"[{\\\"company\\\":\\\"...\\\",\\\"title\\\":\\\"...\\\",\\\"kind\\\":\\\"applied|rejected|interview\\\",\\\"evidence\\\":\\\"max 12 words quoted from the email\\\",\\\"confidence\\\":0.0,\\\"date\\\":\\\"YYYY-MM-DD\\\"}]\",\n  \"\",\n  \"If EMAILS is empty, return [].\",\n  \"\",\n  \"EMAILS:\",\n  JSON.stringify(emails)\n];\n\nconsole.log(\"application-candidate emails:\", emails.length, \"| noise skipped:\", skipped);\nreturn [{ json: { prompt: lines.join(\"\\n\") } }];"
+      },
+      "id": "7a0d22ed-1c64-4e22-b914-212564da5ea1",
+      "name": "Prepare Emails for AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "batching": {}
+      },
+      "id": "9e11128a-a5df-40ab-83bf-d140be27de5f",
+      "name": "Extract Applications with AI",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1760,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Keep only high-confidence, fully-identified applications.\n// Anything vague is dropped here so it can never hide an un-applied job later.\nconst txt = $json.text || $json.response || \"\";\nlet arr = [];\ntry { const m = String(txt).match(/\\[[\\s\\S]*\\]/); arr = JSON.parse(m ? m[0] : txt); } catch (e) { arr = []; }\nif (!Array.isArray(arr)) arr = [];\n\nconst MIN_CONFIDENCE = 0.7;\nconst ALLOWED_KINDS = [\"applied\", \"rejected\", \"interview\"];\nconst applied = [];\nconst rejectedRecords = [];\n\nfor (const x of arr) {\n  if (!x || !x.company) { rejectedRecords.push(\"no company\"); continue; }\n  const company = String(x.company).trim();\n  const title = String(x.title || \"\").trim();\n  const kind = String(x.kind || \"\").toLowerCase().trim();\n  const conf = typeof x.confidence === \"number\" ? x.confidence : 1;\n  // No role title => we cannot tell WHICH job was applied to, so never filter on it.\n  if (!title) { rejectedRecords.push(company + \" (no title)\"); continue; }\n  if (conf < MIN_CONFIDENCE) { rejectedRecords.push(company + \" (low confidence \" + conf + \")\"); continue; }\n  if (kind && ALLOWED_KINDS.indexOf(kind) === -1) { rejectedRecords.push(company + \" (kind \" + kind + \")\"); continue; }\n  const date = /^\\d{4}-\\d{2}-\\d{2}/.test(String(x.date || \"\")) ? String(x.date).slice(0, 10) : \"\";\n  applied.push({ company, title, kind, date, evidence: String(x.evidence || \"\").slice(0, 120), confidence: conf });\n}\n\nconsole.log(\"applied records kept:\", applied.length, \"of\", arr.length);\nif (rejectedRecords.length) console.log(\"ignored records:\", rejectedRecords.join(\" | \"));\nfor (const a of applied) console.log(\"APPLIED:\", a.company, \"//\", a.title, \"//\", a.evidence);\nreturn [{ json: { applied } }];"
+      },
+      "id": "6f3bb9ae-15ef-4017-9cbe-78f882bbbc75",
+      "name": "Keep Confident Applications",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1536,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Job Scout Jobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "id": "292548eb-5782-45b8-a07c-0b1898d68677",
+      "name": "Load Saved Jobs",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1344,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fetches the job boards that need NO credential: Greenhouse, Lever, Ashby (company career pages),\n// Arbeitnow, RemoteOK, the German Federal Employment Agency (public API) and Jooble (key in \"Your Settings\").\n// Each source is isolated: if one fails it is logged and skipped, the run continues.\nconst s = $('Your Settings').first().json;\nconst out = [];\nconst strip = (t) => String(t || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 4000);\nconst problems = [];\nasync function safe(label, fn) {\n  const before = out.length;\n  try { await fn(); if (out.length === before) problems.push(label + ': 0 jobs returned'); }\n  catch (e) { const msg = String((e && (e.description || e.message)) || e).slice(0, 300); problems.push(label + ': ' + msg); console.log('source failed:', label, msg); }\n}\n\nfor (const b of (s.greenhouseBoards || [])) await safe('greenhouse:' + b, async () => {\n  const r = await this.helpers.httpRequest({ url: `https://boards-api.greenhouse.io/v1/boards/${b}/jobs?content=true`, json: true });\n  for (const j of (r.jobs || [])) out.push({ source: 'greenhouse', source_id: String(j.id), title: j.title, company: b, location: (j.location && j.location.name) || '', url: j.absolute_url, description: strip(j.content), posted_at: j.updated_at || '', salary_min: null, salary_max: null });\n});\nfor (const c of (s.leverCompanies || [])) await safe('lever:' + c, async () => {\n  const r = await this.helpers.httpRequest({ url: `https://api.lever.co/v0/postings/${c}?mode=json`, json: true });\n  for (const j of (r || [])) out.push({ source: 'lever', source_id: j.id, title: j.text, company: c, location: (j.categories && j.categories.location) || '', url: j.hostedUrl, description: strip(j.descriptionPlain || j.description), posted_at: j.createdAt ? new Date(j.createdAt).toISOString() : '', salary_min: null, salary_max: null });\n});\nfor (const b of (s.ashbyBoards || [])) await safe('ashby:' + b, async () => {\n  const r = await this.helpers.httpRequest({ url: `https://api.ashbyhq.com/posting-api/job-board/${b}?includeCompensation=true`, json: true });\n  for (const j of (r.jobs || [])) out.push({ source: 'ashby', source_id: j.id, title: j.title, company: b, location: j.locationName || (j.location && j.location.name) || '', url: j.jobUrl || j.applyUrl, description: strip(j.descriptionPlain || j.description), posted_at: j.publishedDate || '', salary_min: null, salary_max: null });\n});\nif (s.useArbeitnow) await safe('arbeitnow', async () => {\n  const r = await this.helpers.httpRequest({ url: 'https://www.arbeitnow.com/api/job-board-api', json: true });\n  for (const j of (r.data || [])) out.push({ source: 'arbeitnow', source_id: j.slug, title: j.title, company: j.company_name, location: j.location || '', url: j.url, description: strip(j.description), posted_at: j.created_at ? new Date(j.created_at * 1000).toISOString() : '', salary_min: null, salary_max: null });\n});\nif (s.useRemoteOk) await safe('remoteok', async () => {\n  const r = await this.helpers.httpRequest({ url: 'https://remoteok.com/api', json: true, headers: { 'User-Agent': 'n8n-job-scout' } });\n  for (const j of (Array.isArray(r) ? r.slice(1) : [])) out.push({ source: 'remoteok', source_id: String(j.id), title: j.position, company: j.company, location: j.location || 'Remote', url: j.url, description: strip(j.description), posted_at: j.date || '', salary_min: j.salary_min || null, salary_max: j.salary_max || null });\n});\n// German Federal Employment Agency (Bundesagentur für Arbeit). 'jobboerse-jobsuche' is the agency's PUBLIC client id, not a personal key.\nif (s.useArbeitsagentur) await safe('arbeitsagentur', async () => {\n  const r = await this.helpers.httpRequest({\n    url: `https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=${encodeURIComponent(s.arbeitsagenturKeyword || '')}&wo=${encodeURIComponent(s.arbeitsagenturLocation || '')}&size=100`,\n    headers: { 'X-API-Key': 'jobboerse-jobsuche' }, json: true });\n  for (const j of (r.stellenangebote || [])) {\n    const loc = j.arbeitsort ? [j.arbeitsort.ort, j.arbeitsort.region].filter(Boolean).join(', ') : '';\n    out.push({ source: 'arbeitsagentur', source_id: j.refnr, title: j.titel || j.beruf || '', company: j.arbeitgeber || '', location: loc, url: j.externeUrl || ('https://www.arbeitsagentur.de/jobsuche/jobdetail/' + encodeURIComponent(j.refnr || '')), description: strip(j.beruf || ''), posted_at: j.aktuelleVeroeffentlichungsdatum || '', salary_min: null, salary_max: null });\n  }\n});\n// Jooble puts the API key inside the URL path, which no n8n credential type supports,\n// so its key lives in \"Your Settings\" (joobleApiKey). Skipped while the placeholder is still there.\nconst jk = String(s.joobleApiKey || '');\nif (jk && !jk.startsWith('YOUR_')) for (const q of (s.joobleKeywords || [])) await safe('jooble:' + q, async () => {\n  const r = await this.helpers.httpRequest({ method: 'POST', url: `https://jooble.org/api/${jk}`, body: { keywords: q, location: s.joobleLocation || '', page: '1' }, json: true });\n  for (const j of (r.jobs || [])) out.push({ source: 'jooble:' + (j.source || ''), source_id: String(j.id || j.link), title: j.title, company: j.company || '', location: j.location || '', url: j.link, description: strip(j.snippet), posted_at: j.updated || '', salary_min: null, salary_max: null });\n});\n\nconsole.log('jobs from free boards:', out.length);\n// Always return one item so the next steps run even if every free board failed.\nreturn [{ json: { freeBoardJobs: out, problems } }];\n"
+      },
+      "id": "2e298f6a-b975-41be-a00a-cd4df7dc6232",
+      "name": "Fetch Free Job Boards",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.adzuna.com/v1/api/jobs/' + $('Your Settings').first().json.adzunaCountry + '/search/1' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "what",
+              "value": "={{ $('Your Settings').first().json.adzunaKeywords }}"
+            },
+            {
+              "name": "results_per_page",
+              "value": "={{ $('Your Settings').first().json.adzunaResultsPerPage }}"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "07216fd9-5729-4305-9141-469527ff7b2c",
+      "name": "Search Adzuna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -480,
+        0
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Adzuna (Custom Auth)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// One item per JSearch query from \"Your Settings\", so the HTTP node below runs once per query.\nconst s = $('Your Settings').first().json;\nreturn (s.jsearchQueries || []).map(q => ({ json: { query: q, country: s.jsearchCountry || 'de', datePosted: s.jsearchDatePosted || 'month' } }));\n"
+      },
+      "id": "935b412f-a277-4b02-af2d-a013b7ea5e47",
+      "name": "List JSearch Queries",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://jsearch.p.rapidapi.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "num_pages",
+              "value": "1"
+            },
+            {
+              "name": "country",
+              "value": "={{ $json.country }}"
+            },
+            {
+              "name": "date_posted",
+              "value": "={{ $json.datePosted }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "jsearch.p.rapidapi.com"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "e3711347-d782-45b2-9cc6-5a8968f87fc6",
+      "name": "Search JSearch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -80,
+        0
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "RapidAPI JSearch (Header Auth)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// One item per job-board URL from \"Your Settings\", so Firecrawl scrapes each board once.\nconst s = $('Your Settings').first().json;\nreturn (s.firecrawlBoardUrls || []).map(url => ({ json: { boardUrl: url } }));\n"
+      },
+      "id": "c0d96af2-e512-459c-a719-f3532d7c964e",
+      "name": "List Firecrawl Boards",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/scrape",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ url: $json.boardUrl, onlyMainContent: true, formats: [{ type: 'json', prompt: 'Extract every job posting listed on this page. For each: title, company, location, an ABSOLUTE URL to the job detail/apply page, a short description if available, and postedDate if shown.', schema: { type: 'object', properties: { jobs: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, url: { type: 'string' }, description: { type: 'string' }, postedDate: { type: 'string' } } } } } } }] }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "d7d5f526-1030-440b-88c8-0e2feaf5830d",
+      "name": "Scrape Boards with Firecrawl",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        320,
+        0
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Firecrawl (Bearer Auth)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merges every source into ONE schema: source, source_id, title, company, location, url,\n// description, posted_at, salary_min, salary_max. Missing/disabled/failed sources are skipped.\nconst strip = (t) => String(t || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 4000);\nconst from = (name) => { try { return $(name).all().map(i => i.json); } catch (e) { return []; } };\nconst out = [];\nconst problems = [];\n\nfor (const it of from('Fetch Free Job Boards')) { for (const j of (it.freeBoardJobs || [])) out.push(j); problems.push(...(it.problems || [])); }\n// HTTP nodes continue on error and pass an \"error\" item instead of results: record it.\nconst httpError = (label, r) => { if (r && r.error) problems.push(label + ': ' + String(r.error.message || r.error.description || JSON.stringify(r.error)).slice(0, 300)); };\nfor (const r of from('Search Adzuna')) httpError('adzuna', r);\nfor (const r of from('Search JSearch')) httpError('jsearch', r);\nfor (const r of from('Scrape Boards with Firecrawl')) httpError('firecrawl', r);\n\nfor (const r of from('Search Adzuna')) for (const j of (r.results || [])) out.push({\n  source: 'adzuna', source_id: String(j.id), title: j.title, company: (j.company && j.company.display_name) || '',\n  location: (j.location && j.location.display_name) || '', url: j.redirect_url, description: strip(j.description),\n  posted_at: j.created || '', salary_min: j.salary_min || null, salary_max: j.salary_max || null });\n\nfor (const r of from('Search JSearch')) for (const j of (Array.isArray(r.data) ? r.data : [])) out.push({\n  source: 'jsearch:' + (j.job_publisher || 'google'), source_id: j.job_id, title: j.job_title, company: j.employer_name || '',\n  location: [j.job_city, j.job_state, j.job_country].filter(Boolean).join(', '), url: j.job_apply_link || j.job_google_link,\n  description: strip(j.job_description), posted_at: j.job_posted_at_datetime_utc || '', salary_min: j.job_min_salary || null, salary_max: j.job_max_salary || null });\n\nconst boards = from('List Firecrawl Boards');\nfrom('Scrape Boards with Firecrawl').forEach((r, i) => {\n  const jobs = (r.data && r.data.json && r.data.json.jobs) || [];\n  const boardUrl = (r.data && r.data.metadata && r.data.metadata.sourceURL) || (boards[i] && boards[i].boardUrl) || '';\n  const host = String(boardUrl).match(/^https?:\\/\\/(?:www\\.)?([^\\/?#:]+)/i); const name = host ? host[1] : 'board';\n  for (const j of jobs) out.push({ source: 'firecrawl:' + name, source_id: j.url || (name + ':' + (j.title || '')), title: j.title || '',\n    company: j.company || '', location: j.location || '', url: j.url || boardUrl, description: strip(j.description || ''),\n    posted_at: j.postedDate || '', salary_min: null, salary_max: null });\n});\n\nconst bySource = {};\nfor (const j of out) { const k = String(j.source).split(':')[0]; bySource[k] = (bySource[k] || 0) + 1; }\nfor (const k of ['adzuna', 'jsearch', 'firecrawl']) if (!bySource[k] && !problems.some(p => p.startsWith(k))) problems.push(k + ': 0 jobs returned (no credential, deactivated, or no results)');\nconsole.log('fetched jobs:', out.length, JSON.stringify(bySource), '| problems:', JSON.stringify(problems));\n// Run report on the FIRST job (open this node's output to see it): jobs per source + every source that failed or returned nothing.\nconst jobs = out.filter(j => j.title && j.url);\nreturn jobs.map((j, i) => ({ json: i === 0 ? { ...j, _fetch_report: { fetched: out.length, bySource, problems } } : j }));\n"
+      },
+      "id": "8c3a0687-fe85-4732-974d-0e83570e083f",
+      "name": "Normalize Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pure-logic hard filters (location, age, salary, dealbreakers). Relevance is NOT judged here —\n// the AI checks each job description against the CV in \"Check Jobs Against CV\".\nconst cfg = $('Your Settings').first().json;\nconst now = Date.now();\n\n// Simple stable string hash (no 'crypto' module — n8n blocks it).\n// Combines two hashes for a longer, low-collision key.\nfunction hashStr(s) {\n  let h1 = 5381, h2 = 52711;\n  for (let i = 0; i < s.length; i++) {\n    const c = s.charCodeAt(i);\n    h1 = ((h1 << 5) + h1 + c) >>> 0;   // djb2\n    h2 = ((h2 << 5) + h2 ^ c) >>> 0;   // variant\n  }\n  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');\n}\n\nconst out = [];\nfor (const item of $input.all()) {\n  const j = item.json;\n  const title = (j.title || '').toLowerCase();\n  const loc = (j.location || '').toLowerCase();\n  const text = title + ' ' + (j.description || '').toLowerCase();\n  if (!j.title || !j.url) continue;\n  if ((cfg.dealbreakerKeywords || []).some(d => text.includes(d.toLowerCase()))) continue;\n  // There is no job-title gate on purpose: relevance is decided by the AI from the job DESCRIPTION vs your CV.\n  // Remote counts only when the job's own location or title says so. \"Hybrid\" or \"remote\" somewhere in the\n  // description is not enough: a hybrid job in Amsterdam is still in Amsterdam.\n  const remoteHit = cfg.remoteOk && /\\b(remote|anywhere|worldwide|home ?office|work from home|wfh)\\b/.test(loc + ' ' + title);\n  const locHit = (cfg.locations || []).some(l => loc.includes(l.toLowerCase()));\n  if ((cfg.locations || []).length && !remoteHit && !locHit) continue;\n  if (j.posted_at && cfg.maxAgeDays) { const t = Date.parse(j.posted_at); if (!isNaN(t) && (now - t) / 86400000 > cfg.maxAgeDays) continue; }\n  if (cfg.salaryFloorEUR && j.salary_max && j.salary_max < cfg.salaryFloorEUR) continue;\n  const hash = hashStr((title + '|' + (j.company || '') + '|' + (j.url || '')).toLowerCase());\n  out.push({ json: { ...j, hash, status: 'new', fetched_at: new Date().toISOString() } });\n}\nconsole.log('survived hard filters:', out.length);\nreturn out;"
+      },
+      "id": "31e6b259-e0ff-45b3-a8cd-5e9cebc08c0b",
+      "name": "Apply Hard Filters",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.hash }}",
+        "options": {}
+      },
+      "id": "4b4ce0cd-c2fe-47e1-aada-45291f788a69",
+      "name": "Skip Jobs Seen Before",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        992,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Drop a job when the Data Table already has a row for the SAME company AND the EXACT same\n// title (100% match), either because you applied to it or because it was already shortlisted\n// on an earlier day (job boards like Jooble change their links daily, so \"Skip Jobs Seen Before\"\n// alone can't recognise them). When in doubt, keep the job.\n// Source of truth = every row in the Data Table (applied, shortlisted, or anything else)\n// plus today's freshly parsed applications in case their insert hasn't landed.\nconst tableRows = $(\"Load Saved Jobs\").all()\n  .map(i => i.json)\n  .filter(r => r && r.company && r.title);\nconst fresh = ($(\"Keep Confident Applications\").first().json.applied) || [];\nconst known = tableRows.map(r => ({ company: r.company, title: r.title, status: r.status || \"?\" }))\n  .concat(fresh.map(a => ({ company: a.company, title: a.title, status: \"applied\" })));\n\nconst cnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\b(gmbh|mbh|inc|ltd|limited|llc|co|corp|corporation|ag|se|bv|nv|oy|ab|sa|plc|kg|ug|e v|group|holding|holdings)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\n\nconst tnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\(.*?\\)/g, \" \")\n  .replace(/\\b(m w d|w m d|d m w|m f d|f m x|all genders|gn|divers|full time|fulltime|part time|parttime|vollzeit|teilzeit|festanstellung|permanent|remote|hybrid|onsite)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\n\n// Two-letter words count (AI, ML, BI, QA, HR, UX, IT ...); only filler words are ignored.\nconst STOP = new Set([\"the\", \"and\", \"for\", \"with\", \"our\", \"you\", \"your\", \"job\", \"jobs\", \"role\", \"position\", \"stelle\", \"als\", \"new\",\n  \"in\", \"of\", \"to\", \"at\", \"on\", \"an\", \"or\", \"as\", \"by\", \"is\", \"we\", \"im\", \"zu\", \"am\", \"um\", \"de\", \"en\", \"la\", \"le\", \"et\", \"und\", \"der\", \"die\", \"das\", \"mit\", \"fur\"]);\nconst toks = s => new Set(tnorm(s).split(\" \").filter(w => w.length > 1 && !STOP.has(w)));\n\nconst titleSim = (a, b) => {\n  const A = toks(a), B = toks(b);\n  if (!A.size || !B.size) return 0;\n  let inter = 0;\n  for (const t of A) if (B.has(t)) inter++;\n  const union = A.size + B.size - inter;\n  return union ? inter / union : 0;\n};\n\n// Company names must be equal after normalisation, or one must fully contain\n// the other AND have at least 2 tokens (so \"Google\" never matches \"Google Cloud\").\nconst companyMatch = (a, b) => {\n  const A = cnorm(a), B = cnorm(b);\n  if (!A || !B) return false;\n  if (A === B) return true;\n  const TA = new Set(A.split(\" \").filter(Boolean));\n  const TB = new Set(B.split(\" \").filter(Boolean));\n  const small = TA.size <= TB.size ? TA : TB;\n  const large = TA.size <= TB.size ? TB : TA;\n  if (small.size < 2) return false;\n  for (const t of small) if (!large.has(t)) return false;\n  return true;\n};\n\n// 1.0 = 100% title match: same words after removing gender tags (m/w/d), brackets,\n// remote/hybrid/full-time etc. \"Senior AI Engineer\" does NOT match \"AI Engineer\".\nconst TITLE_THRESHOLD = 1.0;\nconst kept = [];\nconst dropped = [];\n\nfor (const it of $input.all()) {\n  const j = it.json;\n  let best = null;\n  for (const ap of known) {\n    if (!companyMatch(ap.company, j.company)) continue;\n    const s = titleSim(ap.title, j.title);\n    if (s >= TITLE_THRESHOLD && (!best || s > best.score)) best = { score: s, ap };\n  }\n  if (best) {\n    dropped.push({ status: best.ap.status, text: (j.company || \"?\") + \" / \" + (j.title || \"?\") + \"  <= \" + best.ap.status + \": \" + best.ap.company + \" / \" + best.ap.title + \" (sim \" + best.score.toFixed(2) + \")\" });\n  } else {\n    kept.push(it);\n  }\n}\n\nconst byStatus = {};\nfor (const x of dropped) byStatus[x.status] = (byStatus[x.status] || 0) + 1;\nconsole.log(\"known rows:\", known.length, \"| jobs in:\", $input.all().length, \"| kept:\", kept.length, \"| dropped:\", dropped.length, JSON.stringify(byStatus));\nfor (const x of dropped) console.log(\"DROPPED as already known:\", x.text);\n// Summary on the first kept item so it shows in the execution log.\nif (kept.length) kept[0] = { json: { ...kept[0].json, _known_report: { dropped: dropped.length, byStatus, examples: dropped.slice(0, 15).map(x => x.text) } }, pairedItem: kept[0].pairedItem };\nreturn kept;"
+      },
+      "id": "a480ea75-0416-406c-9e97-286d3d9b6a76",
+      "name": "Skip Applied or Saved Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Send each job's DESCRIPTION + the CV to the AI. The title is NOT used to judge fit.\nconst BATCH = 6;                       // jobs per AI call (descriptions are long)\nconst cfg = $('Your Settings').first().json;\nconst cv = String(cfg.cvText || '').trim();\nif (!cv || cv.startsWith('PASTE YOUR CV')) throw new Error('cvText is empty: paste your CV as plain text into the \"Your Settings\" node.');\nconst homeCountry = String(cfg.homeCountry || 'your country');\nconst minYears = Number(cfg.dropIfYearsRequiredAtLeast) || 5;   // drop jobs that REQUIRE at least this many years\nconst dropSenior = cfg.dropSeniorRoles !== false;                 // drop explicitly mid-level / senior roles\nconst today = new Date().toISOString().slice(0, 10);\n\n// --- 1. Merge duplicates: the same job often arrives via several links/boards. ---\n// Same company + same title (ignoring m/w/d, brackets, remote etc.) = one job; keep the longest description.\nconst cnorm = s => String(s || '').toLowerCase()\n  .replace(/\\b(gmbh|mbh|inc|ltd|limited|llc|co|corp|corporation|ag|se|bv|nv|oy|ab|sa|plc|kg|ug|e v|group|holding|holdings)\\b/g, ' ')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst tnorm = s => String(s || '').toLowerCase()\n  .replace(/\\(.*?\\)/g, ' ')\n  .replace(/\\b(m w d|w m d|d m w|m f d|f m x|w m x|all genders|gn|divers|full time|fulltime|part time|parttime|vollzeit|teilzeit|festanstellung|permanent|remote|hybrid|onsite)\\b/g, ' ')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst groups = new Map();\nfor (const j of $input.all().map(i => i.json)) {\n  const key = cnorm(j.company) + '|' + tnorm(j.title);\n  const prev = groups.get(key);\n  if (!prev) groups.set(key, j);\n  else if (String(j.description || '').length > String(prev.description || '').length) groups.set(key, j);\n}\nconst all = [...groups.values()];\nconsole.log('jobs in:', $input.all().length, '| after merging duplicates:', all.length);\n\n// Short descriptions are still checked; only jobs with NO description at all are dropped here.\nconst items = all.filter(j => String(j.description || '').trim().length > 0);\nconst empty = all.filter(j => String(j.description || '').trim().length === 0);\nconsole.log('jobs to check:', items.length, '| dropped (no description at all):', empty.length);\nfor (const j of empty) console.log('DROPPED no description:', j.company, '//', j.title, '//', j.source);\n\nconst batches = [];\nfor (let i = 0; i < items.length; i += BATCH) batches.push(items.slice(i, i + BATCH));\n\nconst instructions = [\n  'Today is ' + today + '. You are a strict, honest technical recruiter. For EACH job below, decide how qualified',\n  'the candidate is, based ONLY on the requirements written in the job DESCRIPTION. Do NOT judge by the job title.',\n  'Use today\\'s date to work out the candidate\\'s real situation from the CV dates (e.g. total professional',\n  'experience, whether a degree is already completed and whether the candidate is still enrolled).',\n  '',\n  'For each job:',\n  '1. List the concrete requirements in the description: required skills, tools, technologies, years of',\n  '   experience, degree, spoken languages (and level), certifications, seniority. Ignore company boilerplate,',\n  '   benefits and generic soft skills (\"team player\", \"motivated\").',\n  '2. Check every requirement against the CV. Count it as met ONLY if the CV shows clear evidence or a directly',\n  '   transferable equivalent. Never assume a skill that is not in the CV.',\n  '3. qualified_pct = share of requirements met, 0-100. Must-haves count fully, nice-to-haves (\"plus\", \"ideally\",',\n  '   \"von Vorteil\") count half.',\n  '4. Write met / missing as short items (max 6 each).',\n  '5. Some descriptions are only short snippets. Judge them from what IS stated (skills, tools, tasks,',\n  '   experience) and never invent requirements. Set comparable = false ONLY when the description gives',\n  '   nothing at all to compare with the CV (no skills, tools, tasks or requirements, e.g. just a company',\n  '   blurb or a repeat of the title). Otherwise comparable = true.',\n  '6. DEALBREAKERS. Set \"dealbreaker\" to a short reason if the description states a HARD requirement the CV',\n  '   clearly does not meet; otherwise set it to \"\". Only these count as dealbreakers:',\n  '   - a MINIMUM of ' + minYears + ' or more years of professional experience (in total or in a specific field).',\n  '     A smaller minimum (e.g. \"2+ years\", \"3-5 years\") is NOT a dealbreaker - list it under missing;',\n  ...(dropSenior ? [\n  '   - the role is explicitly mid-level or senior: the title or description asks for a Senior, Lead, Principal,',\n  '     Staff, Head of, Director or Mid-level / Medior profile (also German: Teamleitung, Leiter/in). \"(Senior)\" in',\n  '     brackets or \"Junior/Senior\" means juniors are welcome too - that is NOT a dealbreaker;'] : []),\n  '   - a spoken-language requirement the CV does not meet: a language the CV does not list at all, or a level at',\n  '     least TWO CEFR steps above the CV (e.g. B2/C1/C2, \"fluent\", \"fließend\", \"verhandlungssicher\" or native when the',\n  '     CV shows A2). A gap of only ONE step (e.g. C1 required, CV shows B2) is NOT a dealbreaker - list it under missing;',\n  '   - a degree the candidate does not have, when it is mandatory (e.g. a Master\\'s, or a degree only in an',\n  '     unrelated field such as business/finance/law) - not when \"or equivalent experience\" is accepted;',\n  '   - mandatory people-management / team-lead experience;',\n  '   - current university enrolment: working-student / Werkstudent positions, mandatory internships',\n  '     (Pflichtpraktikum), or any role that requires being an enrolled student (\"immatrikuliert\", \"enrolled\") -',\n  '     but ONLY when the CV shows the candidate is no longer enrolled (degree completed);',\n  '   - the job must be done from a country other than ' + homeCountry + ' with no remote option from ' + homeCountry + '.',\n  '   Do NOT mark nice-to-haves, preferences or \"ideally\" items as dealbreakers.',\n  '',\n  'Return ONLY a JSON array, one object per job, no prose:',\n  '[{\"id\":\"<id>\",\"comparable\":true,\"dealbreaker\":\"\",\"qualified_pct\":<int 0-100>,\"met\":[\"...\"],\"missing\":[\"...\"]}]',\n  '',\n  'CANDIDATE CV:',\n  cv,\n].join('\\n');\n\nreturn batches.map(b => {\n  const compact = b.map(j => ({ id: j.hash, title: j.title, company: j.company, location: j.location, description: (j.description || '').slice(0, 4000) }));\n  return { json: { prompt: instructions + '\\n\\nJOBS:\\n' + JSON.stringify(compact), batch: b } };\n});\n"
+      },
+      "id": "672a0112-da68-4514-b1d2-7c3d9f44d109",
+      "name": "Prepare AI Batches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "batching": {
+          "batchSize": 4,
+          "delayBetweenBatches": 0
+        }
+      },
+      "id": "27c51504-2652-4ab3-9687-94c82df8f21d",
+      "name": "Check Jobs Against CV",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1792,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Keep a job only if: the AI could compare it, it has NO hard dealbreaker, and you meet\n// MORE than minQualifiedPct % of its requirements. Matched to jobs by id (order doesn't matter).\nconst cfg = $('Your Settings').first().json;\nconst minPct = (cfg.minQualifiedPct != null) ? cfg.minQualifiedPct : 50;\nconst jobs = $('Prepare AI Batches').all().flatMap(b => b.json.batch || []);\n\n// Backstop for the experience / seniority dealbreakers (the AI occasionally scores these instead of dropping them).\nconst minYears = Number(cfg.dropIfYearsRequiredAtLeast) || 5;\nconst dropSenior = cfg.dropSeniorRoles !== false;\nconst JUNIOR_OK = /\\b(junior|jr\\.?|entry|graduate|absolvent|trainee|intern|internship|praktikant|praktikum|werkstudent|working student)\\b/i;\nconst SENIOR = [/\\bsenior\\b/i, /\\bsr\\.?(?=\\s)/i, /\\bprincipal\\b/i, /\\bstaff\\s+(?:\\w+\\s+)?(?:engineer|developer|scientist)\\b/i, /\\bhead of\\b/i,\n  /\\bdirector\\b/i, /\\bmid[- ]?level\\b/i, /\\bmidlevel\\b/i, /\\bmedior\\b/i, /\\blead\\b(?!\\s*(?:gen|generation|management|qualif))/i, /\\bteamleit\\w*/i, /\\bleiter(?:in)?\\b/i, /\\bleitung\\b/i];\nfunction seniorTitle(t) {\n  const s = String(t || '').replace(/\\(\\s*(?:senior|sr\\.?)\\s*\\)/ig, ' ').replace(/\\b(?:junior|jr\\.?)\\s*[\\/&-]\\s*(?:mid|senior|sr\\.?)[\\w-]*/ig, ' junior ');\n  if (JUNIOR_OK.test(s)) return '';\n  for (const re of SENIOR) { const m = s.match(re); if (m) return m[0].trim(); }\n  return '';\n}\nfunction yearsDealbreaker(missing) {\n  for (const x of (missing || [])) {\n    const t = String(x);\n    if (!/(experience|erfahrung|berufserfahrung|professional|years of|jahre|minimum|at least|mindestens)/i.test(t)) continue;\n    const m = t.match(/(\\d{1,2})\\s*(?:\\+|plus)?\\s*(?:(?:-|–|to|bis)\\s*\\d{1,2}\\s*)?(?:years?|yrs?|jahre)/i);\n    if (m && Number(m[1]) >= minYears) return t;\n  }\n  return '';\n}\n\n// The AI sometimes still treats a SMALLER minimum (e.g. \"3+ years\") as a dealbreaker. If its reason is only\n// about years of experience and every number in it is below minYears, ignore it and let the score decide.\nconst OTHER_REASON = /(german|deutsch|english|language|sprach|fluent|native|c1|c2|b2|degree|master|bachelor|diplom|studium|enrol|immatrik|student|werkstudent|intern|praktik|people[- ]?manag|team[- ]?lead|teamleit|leadership|line[- ]?manag|direct reports|senior|staff|principal|head of|director|location|country|relocat|based in|on-?site|office|visa|resident|certif|licen|clearance)/i;\nfunction onlySmallYears(reason) {\n  const nums = [...String(reason).matchAll(/(?<![\\d.])(\\d{1,2})(?:[.,]\\d+)?\\s*\\+?\\s*(?:(?:-|–|to|bis)\\s*\\d{1,2}\\s*)?(?:years?|yrs?|jahre)/gi)].map(m => Number(m[1]));\n  return nums.length > 0 && Math.max(...nums) < minYears && !OTHER_REASON.test(reason);\n}\n\n\n// Read each AI answer. If the whole JSON array is malformed (e.g. one missing comma),\n// fall back to parsing every job object on its own, so one bad entry only loses one job.\nconst byId = {};\nlet badObjects = 0;\nfor (const o of $input.all()) {\n  const txt = String(o.json.text || o.json.response || '');\n  let arr = null;\n  try { const m = txt.match(/\\[[\\s\\S]*\\]/); arr = JSON.parse(m ? m[0] : txt); } catch (e) { arr = null; }\n  if (!Array.isArray(arr)) {\n    arr = [];\n    for (const chunk of (txt.match(/\\{[^{}]*\\}/g) || [])) {\n      try { arr.push(JSON.parse(chunk)); } catch (e) { badObjects++; }\n    }\n    console.log('AI answer was malformed JSON; recovered', arr.length, 'job(s) individually');\n  }\n  for (const s of arr) if (s && s.id) byId[s.id] = s;\n}\n\nconst results = [];\nlet missingAnswer = 0, notComparable = 0, dealbreakers = 0, belowMin = 0;\nfor (const j of jobs) {\n  const s = byId[j.hash];\n  if (!s) { missingAnswer++; continue; }\n  if (s.comparable === false) { notComparable++; continue; }\n  let db = String(s.dealbreaker || '').trim();\n  if (db && onlySmallYears(db)) { console.log('IGNORED dealbreaker (below ' + minYears + ' years):', j.company, '//', j.title, '//', db); db = ''; }\n  if (!db) { const y = yearsDealbreaker(s.missing); if (y) db = 'requires ' + minYears + '+ years: ' + y; }\n  if (!db && dropSenior) { const st = seniorTitle(j.title); if (st) db = 'mid-level/senior role: \"' + st + '\" in title'; }\n  if (db) { dealbreakers++; console.log('DROPPED dealbreaker:', j.company, '//', j.title, '//', db); continue; }\n  const pct = Math.round(Number(s.qualified_pct != null ? s.qualified_pct : s.score) || 0);\n  if (!(pct > minPct)) { belowMin++; continue; }\n  const met = (s.met || []).slice(0, 6), missing = (s.missing || []).slice(0, 6);\n  results.push({ json: { job_id: j.hash, source: j.source, title: j.title, company: j.company, location: j.location, url: j.url,\n    salary_min: j.salary_min, salary_max: j.salary_max, posted_at: j.posted_at, score: pct,\n    reasons: met.length ? 'Meets: ' + met.join('; ') : '', flags: missing.length ? 'Missing: ' + missing.join('; ') : '',\n    status: 'shortlisted', fetched_at: j.fetched_at } });\n}\nresults.sort((a, b) => b.json.score - a.json.score);\nconsole.log('checked:', jobs.length, '| kept (>' + minPct + '%, no dealbreaker):', results.length, '| dealbreaker:', dealbreakers,\n  '| at/below ' + minPct + '%:', belowMin, '| nothing to compare:', notComparable, '| no AI answer:', missingAnswer, '| unreadable entries:', badObjects);\nreturn results;\n"
+      },
+      "id": "f4f0215c-a332-4841-8db4-13500dd4609a",
+      "name": "Keep Qualified Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Job Scout Jobs"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reasons",
+              "displayName": "reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "flags",
+              "displayName": "flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "salary_min",
+              "displayName": "salary_min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "salary_max",
+              "displayName": "salary_max",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "posted_at",
+              "displayName": "posted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fetched_at",
+              "displayName": "fetched_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "58ac90b5-c932-4f16-82e1-0cf387406c9c",
+      "name": "Save Shortlist",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2456,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build one HTML digest from all shortlisted jobs.\nconst jobs = $input.all().map(i => i.json);\nconst today = new Date().toISOString().slice(0, 10);\nlet html;\nif (!jobs.length) {\n  html = `<h2>Job Scout — ${today}</h2><p>No new matching jobs above threshold today.</p>`;\n} else {\n  const rows = jobs.map(j => `<tr><td style=\"text-align:center;font-weight:bold\">${j.score}</td><td><a href=\"${j.url}\">${j.title}</a></td><td>${j.company || ''}</td><td>${j.location || ''}</td><td>${j.reasons || ''}</td></tr>`).join('');\n  html = `<h2>Job Scout — ${today} (${jobs.length} matches)</h2><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse;font-family:sans-serif;font-size:14px\"><tr><th>Score</th><th>Role</th><th>Company</th><th>Location</th><th>Why</th></tr>${rows}</table><p style=\"color:#888;font-size:12px\">Sources: the job boards configured in Your Settings.</p>`;\n}\nreturn [{ json: { subject: `Job Scout — ${today} (${jobs.length} matches)`, html } }];"
+      },
+      "id": "9fd3127b-a33b-4b8a-b1a2-b86388016e4d",
+      "name": "Build Digest Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2456,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $('Your Settings').first().json.digestFromEmail }}",
+        "toEmail": "={{ $('Your Settings').first().json.digestToEmail }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "81e38876-cdb9-4a6f-8f4c-2ac44337127e",
+      "name": "Send Digest Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2680,
+        128
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turn parsed applications into NEW Jobs rows (status = \"applied\").\n// Anything already in the table (same job_id, or same company + title similarity >= 0.7)\n// is skipped here; its rejection/interview is handled by \"Find Status Updates\".\nfunction hashStr(s) {\n  let h1 = 5381, h2 = 52711;\n  for (let i = 0; i < s.length; i++) {\n    const c = s.charCodeAt(i);\n    h1 = ((h1 << 5) + h1 + c) >>> 0;\n    h2 = ((h2 << 5) + h2 ^ c) >>> 0;\n  }\n  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');\n}\nconst cnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\b(gmbh|mbh|inc|ltd|limited|llc|co|corp|corporation|ag|se|bv|nv|oy|ab|sa|plc|kg|ug|e v|group|holding|holdings)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\nconst tnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\(.*?\\)/g, \" \")\n  .replace(/\\b(m w d|w m d|d m w|m f d|f m x|all genders|gn|divers|full time|fulltime|part time|parttime|vollzeit|teilzeit|festanstellung|permanent|remote|hybrid|onsite)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\n// Two-letter words count (AI, ML, BI, QA, HR, UX, IT ...); only filler words are ignored.\nconst STOP = new Set([\"the\", \"and\", \"for\", \"with\", \"our\", \"you\", \"your\", \"job\", \"jobs\", \"role\", \"position\", \"stelle\", \"als\", \"new\",\n  \"in\", \"of\", \"to\", \"at\", \"on\", \"an\", \"or\", \"as\", \"by\", \"is\", \"we\", \"im\", \"zu\", \"am\", \"um\", \"de\", \"en\", \"la\", \"le\", \"et\", \"und\", \"der\", \"die\", \"das\", \"mit\", \"fur\"]);\nconst toks = s => new Set(tnorm(s).split(\" \").filter(w => w.length > 1 && !STOP.has(w)));\nconst titleSim = (a, b) => {\n  const A = toks(a), B = toks(b);\n  if (!A.size || !B.size) return 0;\n  let inter = 0;\n  for (const t of A) if (B.has(t)) inter++;\n  const union = A.size + B.size - inter;\n  return union ? inter / union : 0;\n};\nconst companyMatch = (a, b) => {\n  const A = cnorm(a), B = cnorm(b);\n  if (!A || !B) return false;\n  if (A === B) return true;\n  const TA = new Set(A.split(\" \").filter(Boolean));\n  const TB = new Set(B.split(\" \").filter(Boolean));\n  const small = TA.size <= TB.size ? TA : TB;\n  const large = TA.size <= TB.size ? TB : TA;\n  if (small.size < 2) return false;\n  for (const t of small) if (!large.has(t)) return false;\n  return true;\n};\nconst SAME_JOB = 0.7;\n// Best matching row (same company, title similarity >= 0.7), or null.\nconst bestMatch = (pool, a) => {\n  let best = null;\n  for (const p of pool) {\n    if (!companyMatch(p.company, a.company)) continue;\n    const s = titleSim(p.title, a.title);\n    if (s >= SAME_JOB && (!best || s > best.s)) best = { s, p };\n  }\n  return best ? best.p : null;\n};\n\n// Outcome tracking. Order-safe and idempotent, so re-reading the same email\n// in the 2-day overlap never changes anything:\n//   applied            -> never overwrites an outcome\n//   interview          -> only upgrades \"applied\"/\"shortlisted\"\n//   rejected           -> \"rejected\", or \"interview -> rejected\" after an interview\nconst mergeOutcome = (current, kind) => {\n  const cur = String(current || \"applied\").toLowerCase().trim();\n  const k = String(kind || \"applied\").toLowerCase().trim();\n  if (k === \"interview\") return (cur === \"applied\" || cur === \"shortlisted\" || cur === \"\") ? \"interview\" : cur;\n  if (k === \"rejected\") {\n    if (cur.includes(\"rejected\")) return cur;\n    if (cur.startsWith(\"interview\") || cur === \"shortlisted\") return cur + \" -> rejected\";\n    return \"rejected\";\n  }\n  return cur;\n};\nconst KIND_ORDER = { applied: 0, interview: 1, rejected: 2 };\nconst byDateThenKind = (a, b) => String(a.date || \"\").localeCompare(String(b.date || \"\")) || (KIND_ORDER[a.kind] || 0) - (KIND_ORDER[b.kind] || 0);\nconst today = () => new Date().toISOString().slice(0, 10);\nconst dayIso = d => (d || today()) + \"T00:00:00.000Z\";\n\nconst fresh = (($(\"Keep Confident Applications\").first().json.applied) || []).slice().sort(byDateThenKind);\n// \"Load Saved Jobs\" returns every row; only applications matter here.\nconst existing = $input.all().map(i => i.json).filter(r => r && r.company && String(r.status || \"\").toLowerCase() === \"applied\");\n\nconst ids = new Set(existing.map(r => r.job_id).filter(Boolean));\nconst pool = existing.map(r => ({ company: r.company, title: r.title }));\nconst nowIso = new Date().toISOString();\nconst pending = [];   // new rows created in this run\nlet known = 0;\n\nfor (const a of fresh) {\n  const job_id = \"applied:\" + hashStr((a.company + \"|\" + a.title).toLowerCase());\n  if (ids.has(job_id) || bestMatch(pool, a)) { known++; continue; }   // already in the table -> \"Find Status Updates\" handles it\n  const same = pending.find(r => r.job_id === job_id) || bestMatch(pending, a);\n  if (same) {                                   // e.g. confirmation + rejection both inside the 2-day window\n    const f = mergeOutcome(same.flags, a.kind);\n    if (f !== same.flags) { same.flags = f; same.outcome_at = dayIso(a.date); }\n    continue;\n  }\n  const flags = mergeOutcome(\"applied\", a.kind);\n  pending.push({ source: \"gmail\", company: a.company, title: a.title, status: \"applied\", flags,\n    applied_at: dayIso(a.date), outcome_at: flags === \"applied\" ? null : dayIso(a.date), job_id, fetched_at: nowIso });\n}\n\nconsole.log(\"applied rows in table:\", existing.length, \"| parsed:\", fresh.length, \"| new:\", pending.length, \"| already known:\", known);\nfor (const r of pending) console.log(\"NEW APPLICATION:\", r.company, \"//\", r.title, \"//\", r.flags);\nreturn pending.map(json => ({ json }));\n"
+      },
+      "id": "07167996-e7ac-498a-a40b-1ffa4cffadb1",
+      "name": "Find New Applications",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Job Scout Jobs"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "score",
+              "id": "score",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "title",
+              "id": "title",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "url",
+              "id": "url",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "company",
+              "id": "company",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "location",
+              "id": "location",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "reasons",
+              "id": "reasons",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "flags",
+              "id": "flags",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "salary_min",
+              "id": "salary_min",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "salary_max",
+              "id": "salary_max",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "posted_at",
+              "id": "posted_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "job_id",
+              "id": "job_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "fetched_at",
+              "id": "fetched_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "applied_at",
+              "id": "applied_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "outcome_at",
+              "id": "outcome_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "4ade4a1a-cdda-40d4-a736-5d1797a9994c",
+      "name": "Save New Applications",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -992,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Outcome tracking: a rejection / interview email for an application that is\n// ALREADY in Jobs updates that row's flags (+ outcome_at) instead of adding a row.\nfunction hashStr(s) {\n  let h1 = 5381, h2 = 52711;\n  for (let i = 0; i < s.length; i++) {\n    const c = s.charCodeAt(i);\n    h1 = ((h1 << 5) + h1 + c) >>> 0;\n    h2 = ((h2 << 5) + h2 ^ c) >>> 0;\n  }\n  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');\n}\nconst cnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\b(gmbh|mbh|inc|ltd|limited|llc|co|corp|corporation|ag|se|bv|nv|oy|ab|sa|plc|kg|ug|e v|group|holding|holdings)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\nconst tnorm = s => String(s || \"\").toLowerCase()\n  .replace(/\\(.*?\\)/g, \" \")\n  .replace(/\\b(m w d|w m d|d m w|m f d|f m x|all genders|gn|divers|full time|fulltime|part time|parttime|vollzeit|teilzeit|festanstellung|permanent|remote|hybrid|onsite)\\b/g, \" \")\n  .replace(/[^a-z0-9 ]/g, \" \").replace(/\\s+/g, \" \").trim();\n// Two-letter words count (AI, ML, BI, QA, HR, UX, IT ...); only filler words are ignored.\nconst STOP = new Set([\"the\", \"and\", \"for\", \"with\", \"our\", \"you\", \"your\", \"job\", \"jobs\", \"role\", \"position\", \"stelle\", \"als\", \"new\",\n  \"in\", \"of\", \"to\", \"at\", \"on\", \"an\", \"or\", \"as\", \"by\", \"is\", \"we\", \"im\", \"zu\", \"am\", \"um\", \"de\", \"en\", \"la\", \"le\", \"et\", \"und\", \"der\", \"die\", \"das\", \"mit\", \"fur\"]);\nconst toks = s => new Set(tnorm(s).split(\" \").filter(w => w.length > 1 && !STOP.has(w)));\nconst titleSim = (a, b) => {\n  const A = toks(a), B = toks(b);\n  if (!A.size || !B.size) return 0;\n  let inter = 0;\n  for (const t of A) if (B.has(t)) inter++;\n  const union = A.size + B.size - inter;\n  return union ? inter / union : 0;\n};\nconst companyMatch = (a, b) => {\n  const A = cnorm(a), B = cnorm(b);\n  if (!A || !B) return false;\n  if (A === B) return true;\n  const TA = new Set(A.split(\" \").filter(Boolean));\n  const TB = new Set(B.split(\" \").filter(Boolean));\n  const small = TA.size <= TB.size ? TA : TB;\n  const large = TA.size <= TB.size ? TB : TA;\n  if (small.size < 2) return false;\n  for (const t of small) if (!large.has(t)) return false;\n  return true;\n};\nconst SAME_JOB = 0.7;\n// Best matching row (same company, title similarity >= 0.7), or null.\nconst bestMatch = (pool, a) => {\n  let best = null;\n  for (const p of pool) {\n    if (!companyMatch(p.company, a.company)) continue;\n    const s = titleSim(p.title, a.title);\n    if (s >= SAME_JOB && (!best || s > best.s)) best = { s, p };\n  }\n  return best ? best.p : null;\n};\n\n// Outcome tracking. Order-safe and idempotent, so re-reading the same email\n// in the 2-day overlap never changes anything:\n//   applied            -> never overwrites an outcome\n//   interview          -> only upgrades \"applied\"/\"shortlisted\"\n//   rejected           -> \"rejected\", or \"interview -> rejected\" after an interview\nconst mergeOutcome = (current, kind) => {\n  const cur = String(current || \"applied\").toLowerCase().trim();\n  const k = String(kind || \"applied\").toLowerCase().trim();\n  if (k === \"interview\") return (cur === \"applied\" || cur === \"shortlisted\" || cur === \"\") ? \"interview\" : cur;\n  if (k === \"rejected\") {\n    if (cur.includes(\"rejected\")) return cur;\n    if (cur.startsWith(\"interview\") || cur === \"shortlisted\") return cur + \" -> rejected\";\n    return \"rejected\";\n  }\n  return cur;\n};\nconst KIND_ORDER = { applied: 0, interview: 1, rejected: 2 };\nconst byDateThenKind = (a, b) => String(a.date || \"\").localeCompare(String(b.date || \"\")) || (KIND_ORDER[a.kind] || 0) - (KIND_ORDER[b.kind] || 0);\nconst today = () => new Date().toISOString().slice(0, 10);\nconst dayIso = d => (d || today()) + \"T00:00:00.000Z\";\n\nconst fresh = (($(\"Keep Confident Applications\").first().json.applied) || []).slice().sort(byDateThenKind);\n// \"Load Saved Jobs\" returns every row; only applications matter here.\nconst existing = $input.all().map(i => i.json).filter(r => r && r.company && r.id != null && String(r.status || \"\").toLowerCase() === \"applied\");\n\nconst byJobId = {};\nfor (const r of existing) if (r.job_id) byJobId[r.job_id] = r;\nconst changes = {};   // row id -> { id, company, title, before, flags, outcome_at }\n\nfor (const a of fresh) {\n  if (a.kind !== \"rejected\" && a.kind !== \"interview\") continue;\n  const job_id = \"applied:\" + hashStr((a.company + \"|\" + a.title).toLowerCase());\n  const row = byJobId[job_id] || bestMatch(existing, a);\n  if (!row) continue;                            // not in the table yet -> \"Find New Applications\" inserts it\n  const c = changes[row.id] || { id: row.id, company: row.company, title: row.title, before: row.flags || \"applied\", flags: row.flags || \"applied\", outcome_at: row.outcome_at || null };\n  const f = mergeOutcome(c.flags, a.kind);\n  if (f !== c.flags) { c.flags = f; c.outcome_at = dayIso(a.date); }\n  changes[row.id] = c;\n}\n\nconst out = Object.values(changes).filter(c => c.flags !== c.before);\nconsole.log(\"outcome emails:\", fresh.filter(a => a.kind !== \"applied\").length, \"| rows updated:\", out.length);\nfor (const c of out) console.log(\"OUTCOME:\", c.company, \"//\", c.title, \"//\", c.before, \"=>\", c.flags);\nreturn out.map(c => ({ json: { id: c.id, flags: c.flags, outcome_at: c.outcome_at } }));\n"
+      },
+      "id": "fc3742a3-6dec-4b12-b0ee-0658b915373c",
+      "name": "Find Status Updates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -624
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Job Scout Jobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "flags",
+              "id": "flags",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "outcome_at",
+              "id": "outcome_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "flags": "={{ $json.flags }}",
+            "outcome_at": "={{ $json.outcome_at }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "cbbe7af2-15b5-49bf-9575-d59651d68839",
+      "name": "Update Application Status",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -992,
+        -624
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Score job listings against your CV with Claude and track applications from Gmail\n\n### Who's it for\nJob seekers who want a short daily list of jobs they actually qualify for, plus an automatic log of the applications they send.\n\n### How it works\n1. **Track applications:** Claude reads the last 2 days of Gmail confirmations, rejections and interview invites and logs them in a Data Table.\n2. **Collect jobs** from Arbeitnow, RemoteOK, Greenhouse/Lever/Ashby career pages, Adzuna, JSearch, Jooble and Firecrawl-scraped boards. The German Federal Employment Agency is included but off by default (see note 2).\n3. **Filter** out jobs by location, age and salary, jobs seen before, and jobs already in your table (applied to or shortlisted on an earlier day).\n4. **AI check:** Claude compares each job *description* with your CV. Jobs with a hard dealbreaker (e.g. 5+ years required, or an explicitly senior role), or where you meet 50% or less of the requirements, are dropped.\n5. **Save & notify:** matches are saved with what you meet and what's missing, and emailed as a daily digest.\n\n### How to set up\n1. Create a Data Table named **Job Scout Jobs** (columns in note 5).\n2. Fill in **Your Settings**: your CV, locations, keywords and digest emails.\n3. Add credentials: Gmail, Anthropic, SMTP, and Adzuna, JSearch and Firecrawl on their HTTP nodes (see note 2).\n4. **Jooble** needs its key inside the URL, which n8n credentials can't do, so paste it into `joobleApiKey` in Your Settings, or leave the placeholder to skip Jooble.\n5. Deactivate any source you don't use, then activate the workflow.\n\n### Requirements\nn8n with Data Tables, Gmail and an Anthropic API key. Optional: Adzuna, RapidAPI (JSearch), Firecrawl, Jooble, SMTP.\n\n### How to customize\nEdit the match threshold, experience limit, senior-role filter, country and search lists in Your Settings, the remaining dealbreaker rules in \"Prepare AI Batches\", or swap Claude for another chat model. Defaults are Germany-focused. If a source seems quiet, open **Normalize Jobs**: its first item has a `_fetch_report` with jobs per source and any errors. To get an email when a run fails, build a small workflow with an **Error Trigger** and an email node, then select it in **Workflow settings → Error workflow**.",
+        "height": 1340,
+        "width": 560
+      },
+      "id": "dc5b1c84-984c-4042-9354-da516c222555",
+      "name": "Template Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3264,
+        -720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Start here: Your Settings\nEverything you need to edit lives in **Your Settings**:\n- `cvText`: your CV as plain text, with dates and language levels\n- `homeCountry`, `locations`, `remoteOk`, `salaryFloorEUR`, `maxAgeDays`\n- `minQualifiedPct`: keep jobs above this % (default 50)\n- `dropIfYearsRequiredAtLeast`: drop jobs that require this many years or more (default 5)\n- `dropSeniorRoles`: drop explicitly mid-level / senior roles (default true)\n- search keywords per source, `firecrawlBoardUrls`\n- `joobleApiKey`: replace `YOUR_JOOBLE_API_KEY` or leave it to skip Jooble\n- `digestToEmail` / `digestFromEmail`\n\nLists use the format `[\"a\", \"b\"]`.",
+        "height": 460,
+        "width": 400,
+        "color": 7
+      },
+      "id": "9ac71f74-750a-48cf-b89a-328b571f04ab",
+      "name": "Note: Your Settings",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2688,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Track applications from Gmail\nReads the **last 2 days** of email for application confirmations, rejections and interview invites (a missed run catches up the next day). Claude extracts company, role and outcome.\n\n- **New application** → saved to the Data Table with `status = applied`\n- **Rejection / interview** for a known application → that row's `flags` and `outcome_at` are updated\n\nIf Gmail or Claude fails (e.g. expired login or no API credit), application tracking is skipped that day and the job search still runs.\n**Credentials:** Gmail OAuth2, Anthropic.",
+        "height": 360,
+        "width": 520,
+        "color": 7
+      },
+      "id": "f39c2eff-a65d-44fa-8fb1-324feef3ae1f",
+      "name": "Note: 1. Track applications",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2208,
+        -768
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect jobs from job boards\n- **Fetch Free Job Boards:** Arbeitnow, RemoteOK, Greenhouse/Lever/Ashby company pages and Jooble. No credential needed. The Federal Employment Agency is off by default (`useArbeitsagentur`) because its API currently rejects requests (403).\n- **Search Adzuna:** Custom Auth credential → `{\"qs\": {\"app_id\": \"YOUR_ADZUNA_APP_ID\", \"app_key\": \"YOUR_ADZUNA_APP_KEY\"}}`\n- **Search JSearch:** Header Auth credential → name `X-RapidAPI-Key`, value `YOUR_RAPIDAPI_KEY`\n- **Scrape Boards with Firecrawl:** Bearer Auth credential → `YOUR_FIRECRAWL_API_KEY`\n- **Jooble:** key goes in Your Settings (its API needs the key in the URL, which credentials can't do).\n\nNo key for a source? Right-click its node → **Deactivate**. **Normalize Jobs** merges everything; its first item's `_fetch_report` lists jobs per source and any failures.",
+        "height": 480,
+        "width": 620,
+        "color": 7
+      },
+      "id": "a6312486-0f90-484c-9b9d-389a4f5319aa",
+      "name": "Note: 2. Collect jobs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -608
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Filter out unsuitable and known jobs\n- **Apply Hard Filters:** location / remote, posting age, salary floor and dealbreaker keywords from Your Settings\n- **Skip Jobs Seen Before:** never shows the same posting (same link) twice\n- **Skip Applied or Saved Jobs:** drops a job when your Data Table already has the **same company and exact same title**, either because you applied or because it was shortlisted on an earlier day. This catches boards like Jooble that change their links every day. Gender tags like (m/w/d) and \"remote\" are ignored.",
+        "height": 340,
+        "width": 600,
+        "color": 7
+      },
+      "id": "a59b59ee-f7c6-4150-b9d5-935a51b46a11",
+      "name": "Note: 3. Filter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Check each job against your CV with AI\nClaude reads the **job description**, lists its requirements and checks each one against your CV (nice-to-haves count half).\n\nA job is **dropped** when:\n- it requires **5+ years** of experience (`dropIfYearsRequiredAtLeast`; smaller minimums like 2+ years are kept and listed as missing)\n- it is an explicitly **mid-level or senior** role: Senior, Lead, Principal, Staff, Head of (`dropSeniorRoles`; \"(Senior)\" in brackets is kept)\n- it has another hard **dealbreaker**: a language level well above yours, a mandatory degree you lack, required team leadership, student enrolment you no longer have, or work only possible outside `homeCountry`\n- you meet **50% or less** of its requirements (`minQualifiedPct`)\n- the description has nothing to compare (e.g. only a company blurb)\n\nThe experience and seniority rules are also double-checked in code in **Keep Qualified Jobs**. Jobs are merged and sent in batches of 6 to keep costs low.",
+        "height": 540,
+        "width": 600,
+        "color": 7
+      },
+      "id": "a04826a9-7687-4bbf-a359-73eac8ae0739",
+      "name": "Note: 4. AI check",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        -640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Save the shortlist and email a digest\n**Save Shortlist** writes each match to the Data Table: score, `reasons` (what you meet) and `flags` (what's missing).\n\n**Data Table \"Job Scout Jobs\" columns:** source, score (number), title, url, company, location, reasons, flags, salary_min, salary_max, posted_at (date), status, job_id, fetched_at (date), applied_at (date), outcome_at (date).\n\n**Send Digest Email** mails the day's matches (SMTP credential). Set the addresses in Your Settings, or deactivate both digest nodes if you don't want email.",
+        "height": 400,
+        "width": 520,
+        "color": 7
+      },
+      "id": "92907b29-febc-4e41-bc76-62626d87464d",
+      "name": "Note: 5. Save and notify",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2408,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 60,
+        "simple": false,
+        "filters": {
+          "includeSpamTrash": false,
+          "q": "newer_than:2d -in:spam -in:trash -category:promotions -subject:(\"job alert\" OR \"jobs for you\" OR \"new jobs\" OR \"job recommendations\" OR newsletter OR digest OR \"jobs matching\") (subject:(\"thank you for applying\" OR \"application received\" OR \"we received your application\" OR \"your application\" OR \"application confirmation\" OR \"not moving forward\" OR \"regret to inform\" OR \"interview invitation\" OR \"invitation to interview\") OR \"thank you for your application\" OR \"your application for the position\")"
+        },
+        "options": {}
+      },
+      "id": "75b325bc-e4a8-4395-8ed8-933b4611c3f0",
+      "name": "Get Recent Application Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2160,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "=claude-haiku-4-5"
+        },
+        "options": {}
+      },
+      "id": "9950dca2-1afa-4fd5-bcae-c6df9958ce14",
+      "name": "Claude Haiku (emails)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -1760,
+        224
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "=claude-haiku-4-5"
+        },
+        "options": {}
+      },
+      "id": "088ee794-b03a-4d48-8245-bf3a8b3cc10a",
+      "name": "Claude Haiku (scoring)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1792,
+        240
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Day at 8am": {
+      "main": [
+        [
+          {
+            "node": "Your Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Emails for AI": {
+      "main": [
+        [
+          {
+            "node": "Extract Applications with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Applications with AI": {
+      "main": [
+        [
+          {
+            "node": "Keep Confident Applications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Confident Applications": {
+      "main": [
+        [
+          {
+            "node": "Load Saved Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Free Job Boards": {
+      "main": [
+        [
+          {
+            "node": "Search Adzuna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Adzuna": {
+      "main": [
+        [
+          {
+            "node": "List JSearch Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List JSearch Queries": {
+      "main": [
+        [
+          {
+            "node": "Search JSearch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search JSearch": {
+      "main": [
+        [
+          {
+            "node": "List Firecrawl Boards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Firecrawl Boards": {
+      "main": [
+        [
+          {
+            "node": "Scrape Boards with Firecrawl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Boards with Firecrawl": {
+      "main": [
+        [
+          {
+            "node": "Normalize Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Jobs": {
+      "main": [
+        [
+          {
+            "node": "Apply Hard Filters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Hard Filters": {
+      "main": [
+        [
+          {
+            "node": "Skip Jobs Seen Before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Jobs Seen Before": {
+      "main": [
+        [
+          {
+            "node": "Skip Applied or Saved Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Batches": {
+      "main": [
+        [
+          {
+            "node": "Check Jobs Against CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Jobs Against CV": {
+      "main": [
+        [
+          {
+            "node": "Keep Qualified Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Qualified Jobs": {
+      "main": [
+        [
+          {
+            "node": "Save Shortlist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Digest Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Digest Email": {
+      "main": [
+        [
+          {
+            "node": "Send Digest Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find New Applications": {
+      "main": [
+        [
+          {
+            "node": "Save New Applications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Status Updates": {
+      "main": [
+        [
+          {
+            "node": "Update Application Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your Settings": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Application Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Application Emails": {
+      "main": [
+        [
+          {
+            "node": "Prepare Emails for AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku (emails)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Applications with AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku (scoring)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Check Jobs Against CV",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Saved Jobs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Free Job Boards",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find New Applications",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Status Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Applied or Saved Jobs": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "YOUR_ERROR_WORKFLOW_ID"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [],
+  "nodeGroups": [
+    {
+      "id": "3dbe721f-052b-4de8-a40d-df58de2c83d8",
+      "name": "Collect jobs from job boards",
+      "nodeNames": [
+        "Fetch Free Job Boards",
+        "Search Adzuna",
+        "List JSearch Queries",
+        "Search JSearch",
+        "List Firecrawl Boards",
+        "Scrape Boards with Firecrawl",
+        "Normalize Jobs",
+        "Note: 2. Collect jobs"
+      ],
+      "description": "Pulls fresh listings from free boards, Adzuna, JSearch, Jooble and Firecrawl into one format."
+    },
+    {
+      "id": "fd632556-9ba7-41a9-8ef8-d0c055dbdcc4",
+      "name": "Filter out unsuitable and known jobs",
+      "nodeNames": [
+        "Apply Hard Filters",
+        "Skip Jobs Seen Before",
+        "Skip Applied or Saved Jobs",
+        "Note: 3. Filter"
+      ],
+      "description": "Drops jobs by location, age, salary and keywords, jobs seen before, and jobs already applied to or saved."
+    },
+    {
+      "id": "9a475014-85b3-4288-9712-5ec2e31a6091",
+      "name": "Track applications from Gmail",
+      "nodeNames": [
+        "Get Recent Application Emails",
+        "Prepare Emails for AI",
+        "Extract Applications with AI",
+        "Claude Haiku (emails)",
+        "Keep Confident Applications",
+        "Note: 1. Track applications"
+      ],
+      "description": "Reads the last 2 days of Gmail and lets Claude extract applications, rejections and interview invites."
+    },
+    {
+      "id": "edadfa7b-3ddd-4997-8bff-f34c5e1f0154",
+      "name": "Check each job against your CV with AI",
+      "nodeNames": [
+        "Prepare AI Batches",
+        "Check Jobs Against CV",
+        "Claude Haiku (scoring)",
+        "Note: 4. AI check"
+      ],
+      "description": "Claude compares each job description with your CV and keeps jobs you are qualified for."
+    }
+  ]
+}
